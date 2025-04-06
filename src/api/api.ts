@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// 在开发环境使用localhost，在生产环境使用相对路径
+const API_URL = import.meta.env.DEV 
+  ? import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+  : '/api';
 
 export interface Item {
   _id: string;
@@ -32,6 +35,48 @@ const saveLocalItems = (category: string, items: any[]) => {
   }
 };
 
+// 同步本地项目到服务器
+const syncLocalItems = async () => {
+  try {
+    const categories = ['tasks', 'articles', 'ideas', 'knowledge'];
+    
+    for (const category of categories) {
+      const localItems = getLocalItems(category);
+      
+      // 找出本地生成的项目（ID以local_开头）
+      const localGeneratedItems = localItems.filter(item => item._id.startsWith('local_'));
+      
+      if (localGeneratedItems.length > 0) {
+        console.log(`尝试同步 ${localGeneratedItems.length} 个本地${category}项目到服务器...`);
+        
+        // 尝试将每个本地项目同步到服务器
+        for (const item of localGeneratedItems) {
+          try {
+            // 创建新项目到服务器
+            const response = await axios.post(`${API_URL}/items`, { 
+              content: item.content,
+              category: item.category || category
+            });
+            
+            // 从本地存储中移除此本地项目
+            const updatedLocalItems = localItems.filter(localItem => localItem._id !== item._id);
+            // 添加服务器返回的项目
+            updatedLocalItems.push(response.data);
+            // 更新本地存储
+            saveLocalItems(category, updatedLocalItems);
+            
+            console.log(`成功同步项目: ${item.content.substring(0, 20)}...`);
+          } catch (err) {
+            console.error(`无法同步本地项目:`, err);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('同步本地项目时出错:', error);
+  }
+};
+
 // 添加错误信息
 const logError = (action: string, error: any) => {
   console.error(`API Error (${action}):`, error.response?.data || error.message || error);
@@ -44,8 +89,15 @@ const logError = (action: string, error: any) => {
 
 // 获取项目
 export const getItems = async (category: string) => {
+  // 尝试同步本地项目到服务器
+  await syncLocalItems().catch(err => console.error('同步失败:', err));
+  
   try {
     const response = await axios.get(`${API_URL}/items/${category}`);
+    
+    // 更新本地存储，确保与服务器数据同步
+    saveLocalItems(category, response.data);
+    
     return response.data;
   } catch (error) {
     logError('getItems', error);
@@ -69,7 +121,7 @@ export const createItem = async (content: string, category: string) => {
     
     // 离线情况下保存到本地存储
     const newItem = {
-      _id: `local_${Date.now()}`,
+      _id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       content,
       category,
       createdAt: new Date().toISOString()
@@ -84,6 +136,27 @@ export const createItem = async (content: string, category: string) => {
 
 // 更新项目
 export const updateItem = async (id: string, content: string, category: string) => {
+  // 如果是本地项目，先尝试同步到服务器
+  if (id.startsWith('local_')) {
+    try {
+      await syncLocalItems();
+      // 重新获取本地存储中的项目，检查是否已同步到服务器
+      const localItems = getLocalItems(category);
+      const localItem = localItems.find(item => item._id === id);
+      
+      // 如果本地项目仍然存在，直接更新本地存储
+      if (localItem) {
+        const updatedItems = localItems.map(item => 
+          item._id === id ? { ...item, content, updatedAt: new Date().toISOString() } : item
+        );
+        saveLocalItems(category, updatedItems);
+        return { ...localItem, content };
+      }
+    } catch (err) {
+      console.error('同步本地项目失败:', err);
+    }
+  }
+  
   try {
     const response = await axios.put(`${API_URL}/items/${id}`, { content });
     
@@ -105,6 +178,8 @@ export const updateItem = async (id: string, content: string, category: string) 
         item._id === id ? { ...item, content, updatedAt: new Date().toISOString() } : item
       );
       saveLocalItems(category, updatedItems);
+      const updatedItem = updatedItems.find(item => item._id === id);
+      if (updatedItem) return updatedItem;
     }
     
     throw error; // 仍然抛出错误，让调用者知道API调用失败
