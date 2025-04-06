@@ -1,0 +1,122 @@
+@keyframes textGlow {
+  0%, 100% { text-shadow: 0 0 5px rgba(255, 0, 255, 0.5); }
+}
+
+@keyframes borderFlow {
+  0%, 100% { border-color: #ff00ff; }
+}
+
+@keyframes gradientBg {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.title-glow {
+  text-shadow: 0 0 10px rgba(255, 0, 255, 0.7);
+  letter-spacing: -0.05em;
+}
+
+.border-flow {
+  border-color: #ff00ff;
+  transition: all 0.3s;
+}
+
+.gradient-bg {
+  background: linear-gradient(-45deg, #121212, #1a1a1a, #252525, #1a1a1a);
+  background-size: 400% 400%;
+}
+
+.text-gradient {
+  background: linear-gradient(90deg, #ff00ff, #00ffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.card-modern {
+  backdrop-filter: blur(10px);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card-modern:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.sliced-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.sliced-bg::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 120%;
+  height: 120%;
+  background: linear-gradient(135deg, rgba(255, 0, 255, 0.1), rgba(0, 255, 255, 0.1));
+  z-index: -1;
+  transform: skewY(-12deg);
+}
+
+.sliced-bg::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 120%;
+  height: 40%;
+  background: linear-gradient(135deg, rgba(255, 255, 0, 0.1), rgba(255, 0, 255, 0.1));
+  z-index: -1;
+  transform: skewY(12deg);
+}
+
+.pill-button {
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.pill-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(255, 0, 255, 0.5), rgba(0, 255, 255, 0.5));
+  z-index: -1;
+  transition: all 0.3s;
+  opacity: 0;
+}
+
+.pill-button:hover::before {
+  opacity: 1;
+}
+
+.diagonal-split {
+  position: relative;
+  overflow: hidden;
+}
+
+.diagonal-split::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 150%;
+  height: 100%;
+  background-color: rgba(255, 0, 255, 0.1);
+  transform: rotate(-45deg) translateX(-100%);
+  z-index: -1;
+}
+
+.bright-focus:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 0, 255, 0.5), 0 0 0 6px rgba(0, 255, 255, 0.3);
+} 
