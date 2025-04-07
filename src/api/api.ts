@@ -104,7 +104,7 @@ export const getItems = async (category: string) => {
   await syncLocalItems().catch(err => console.error('同步失败:', err));
 
   try {
-    const response = await axios.get(`${API_URL}/items/${category}`);
+    const response = await axios.get(`${API_URL}/categories/${category}`);
 
     // 更新本地存储，确保与服务器数据同步
     saveLocalItems(category, response.data);
@@ -177,7 +177,7 @@ export const updateItem = async (id: string, content: string, category: string) 
   }
 
   try {
-    const response = await axios.put(`${API_URL}/items/${id}`, { content });
+    const response = await axios.put(`${API_URL}/item/${id}`, { content });
 
     // 同步更新本地存储
     const localItems = getLocalItems(category);
@@ -231,7 +231,7 @@ export const deleteItem = async (id: string) => {
 
   // 否则尝试从API中删除
   try {
-    const response = await axios.delete(`${API_URL}/items/${id}`);
+    const response = await axios.delete(`${API_URL}/item/${id}`);
 
     // 同步更新所有本地存储类别
     const categories = ['tasks', 'articles', 'ideas', 'knowledge'];
