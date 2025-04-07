@@ -1,26 +1,23 @@
-import mongoose from 'mongoose';
+import supabase from './supabase.js';
 
 const connectDB = async () => {
   try {
-    console.log('尝试连接到MongoDB...');
-    console.log('连接URI:', process.env.MONGODB_URI);
-    
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000, // 5秒超时
-      socketTimeoutMS: 45000, // 增加socket超时
-    });
+    console.log('尝试连接到Supabase...');
 
-    console.log(`MongoDB连接成功: ${conn.connection.host}`);
+    // 测试Supabase连接
+    const { data, error } = await supabase.from('health_check').select('*').limit(1);
+
+    if (error) {
+      throw error;
+    }
+
+    console.log('Supabase连接成功');
     return true;
   } catch (error) {
-    console.error(`MongoDB连接错误: ${error.message}`);
-    if (error.name === 'MongoServerSelectionError') {
-      console.error('无法连接到MongoDB服务器。请检查连接字符串和网络连接。');
-    }
+    console.error(`Supabase连接错误: ${error.message}`);
+    console.error('无法连接到Supabase。请检查URL和API密钥。');
     return false;
   }
 };
 
-export default connectDB; 
+export default connectDB;

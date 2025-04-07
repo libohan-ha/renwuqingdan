@@ -31,12 +31,12 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   console.log('正在启动服务器...');
-  
+
   // 尝试连接数据库
   const isConnected = await connectDB();
-  
+
   if (!isConnected) {
-    console.warn('MongoDB连接失败，服务将继续运行但可能功能受限');
+    console.warn('Supabase连接失败，服务将继续运行但可能功能受限');
   }
 
   app.listen(PORT, () => {
@@ -47,4 +47,4 @@ const startServer = async () => {
 
 startServer().catch(err => {
   console.error('服务器启动失败:', err);
-}); 
+});
